@@ -13,9 +13,8 @@ erb config/nginx.conf.erb > config/nginx.conf
 	mkdir -p logs/nginx
 	touch logs/nginx/access.log logs/nginx/error.log
 	#Redirect NGINX logs to stdout.
-	exec tail -qF -n 0 logs/nginx/*.log &
 	echo 'buildpack=nginx at=logs-initialized'
-	wait
+	tail -qF -n 0 logs/nginx/*.log
 	echo 'logs' >$psmgr
 ) &
 
@@ -23,9 +22,8 @@ erb config/nginx.conf.erb > config/nginx.conf
 (
 	#Take the command passed to this bin and start it.
 	#E.g. bin/start-nginx bundle exec unicorn -c config/unicorn.rb
-	exec $@ &
 	echo "buildpack=nginx at=start-app cmd=$@"
-	wait
+	"$@"
 	echo 'app' >$psmgr
 ) &
 #We block on app-initialized so that when NGINX binds to $PORT
@@ -41,9 +39,8 @@ echo 'buildpack=nginx at=app-initialized'
 (
 	#We expect nginx to run in foreground.
 	#We also expect a socket to be at /tmp/nginx.socket.
-	exec bin/nginx -p . -c config/nginx.conf &
-	echo 'buildpack=nginx at=nginx-started'
-	wait
+	echo 'buildpack=nginx at=nginx-start'
+	bin/nginx -p . -c config/nginx.conf
 	echo 'nginx' >$psmgr
 ) &
 
