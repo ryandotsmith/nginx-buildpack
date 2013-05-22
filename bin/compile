@@ -2,6 +2,7 @@
 
 set -e
 
+mkdir -p "$1/bin/"
 cp bin/nginx "$1/bin/"
 echo '-----> nginx-buildpack: Installed NGINX 1.4.1 to app/bin'
 cp bin/start-nginx "$1/bin/"

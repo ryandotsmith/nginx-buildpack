@@ -69,8 +69,8 @@ Here are 2 setup examples. One example for a new app, another for an existing ap
 Update Buildpacks
 ```bash
 $ heroku config:set BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git
-$ echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz' >> .buildpacks
 $ echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/ryandotsmith/nginx-buildpack.tgz' >> .buildpacks
+$ echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz' >> .buildpacks
 $ git add .buildpacks
 $ git commit -m 'Add multi-buildpack'
 ```
