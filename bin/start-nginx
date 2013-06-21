@@ -7,6 +7,15 @@ mkfifo $psmgr
 #Evaluate config to get $PORT
 erb config/nginx.conf.erb > config/nginx.conf
 
+n=1
+while getopts :f option ${@:1:2}
+do
+        case "${option}"
+        in
+                f) FORCE=$OPTIND; n=$((n+1));;
+        esac
+done
+
 #Start log redirection.
 (
 	#Initialize log directory.
@@ -22,18 +31,25 @@ erb config/nginx.conf.erb > config/nginx.conf
 (
 	#Take the command passed to this bin and start it.
 	#E.g. bin/start-nginx bundle exec unicorn -c config/unicorn.rb
-	echo "buildpack=nginx at=start-app cmd=$@"
-	"$@"
+        COMMAND=${@:$n}
+	echo "buildpack=nginx at=start-app cmd=$COMMAND"
+	"$COMMAND"
 	echo 'app' >$psmgr
 ) &
-#We block on app-initialized so that when NGINX binds to $PORT
-#are app is ready for traffic.
-while [[ ! -f /tmp/app-initialized ]]
-do
-	echo 'buildpack=nginx at=app-initialization'
-	sleep 1
-done
-echo 'buildpack=nginx at=app-initialized'
+
+if [[ -z "$FORCE" ]]
+then
+	FILE="/tmp/app-initialized"
+
+	#We block on app-initialized so that when NGINX binds to $PORT
+	#are app is ready for traffic.
+	while [[ ! -f "$FILE" ]]
+	do
+		echo 'buildpack=nginx at=app-initialization'
+		sleep 1
+	done
+	echo 'buildpack=nginx at=app-initialized'
+fi
 
 #Start NGINX
 (
