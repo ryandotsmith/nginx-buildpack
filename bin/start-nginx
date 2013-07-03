@@ -33,7 +33,7 @@ done
 	#E.g. bin/start-nginx bundle exec unicorn -c config/unicorn.rb
         COMMAND=${@:$n}
 	echo "buildpack=nginx at=start-app cmd=$COMMAND"
-	"$COMMAND"
+	$COMMAND
 	echo 'app' >$psmgr
 ) &
 
