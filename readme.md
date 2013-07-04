@@ -56,6 +56,10 @@ web: bin/start-nginx bundle exec unicorn -c config/unicorn.rb
 
 You can provide your own NGINX config by creating a file named `nginx.conf.erb` in the config direcotry of your app. Start by copying the buildpack's [default config file](https://github.com/ryandotsmith/nginx-buildpack/blob/master/config/nginx.conf.erb).
 
+### Customizable NGINX Compile Options
+
+See [scripts/build_nginx.sh](scripts/build_nginx.sh) for the build steps. Configuring is as easy as changing the "./configure" options.
+
 ### Application/Dyno coordination
 
 The buildpack will not start NGINX until a file has been written to `/tmp/app-initialized`. Since NGINX binds to the dyno's $PORT and since the $PORT determines if the app can receive traffic, you can delay NGINX accepting traffic until your application is ready to handle it. The examples below show how/when you should write the file when working with Unicorn.
