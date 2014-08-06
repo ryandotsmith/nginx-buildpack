@@ -85,7 +85,7 @@ Update Buildpacks
 ```bash
 $ heroku config:set BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git
 $ echo 'https://github.com/ryandotsmith/nginx-buildpack.git' >> .buildpacks
-$ echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz' >> .buildpacks
+$ echo 'https://github.com/heroku/heroku-buildpack-ruby.git' >> .buildpacks
 $ git add .buildpacks
 $ git commit -m 'Add multi-buildpack'
 ```
