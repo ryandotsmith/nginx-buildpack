@@ -45,6 +45,7 @@ echo "Downloading $upload_module_url"
 	cd nginx-${NGINX_VERSION}
 	./configure \
 		--with-pcre=pcre-${PCRE_VERSION} \
+		--with-http_auth_request_module \
 		--prefix=/tmp/nginx \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/nginx-upload-module-${UPLOAD_VERSION}
