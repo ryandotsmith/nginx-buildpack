@@ -3,8 +3,8 @@
 set -e
 
 mkdir -p "$1/bin/"
-echo 'buildpack:' `pwd` $STACK 
-find / -print 
+echo 'buildpack:' $1 `pwd` $STACK 
+ls -l /tmp/build*
 
 cp "bin/nginx-$STACK" "$1/bin/nginx"
 nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
