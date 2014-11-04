@@ -4,13 +4,7 @@ set -e
 
 mkdir -p "$1/bin/"
 echo 'buildpack:' `pwd` $STACK 
-ls -l 
-echo "=== /app/bin ===" 
-ls -l /app/bin
-echo "=== /app/tmp ===" 
-ls -l /app/tmp
-echo "=== / ===" 
-ls -l / 
+find / -print 
 
 cp "bin/nginx-$STACK" "$1/bin/nginx"
 nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
