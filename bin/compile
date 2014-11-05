@@ -3,11 +3,11 @@
 
 set -e
 
-BUILDPACK_BINDIR = `dirname $0` 
-BUILDPACK_DIR = `dirname $BUILDPACK_BINDIR`
-APP_DIR = $1
-APP_CACHEDIR = $2
-APP_ENVDIR = $3 
+BUILDPACK_BINDIR=`dirname $0` 
+BUILDPACK_DIR=`dirname $BUILDPACK_BINDIR`
+APP_DIR=$1
+APP_CACHEDIR=$2
+APP_ENVDIR=$3 
 
 # make sure the cache directory is there 
 mkdir -p $APP_CACHEDIR 
