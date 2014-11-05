@@ -1,36 +1,54 @@
 #!/usr/bin/env bash
+# compile <build-dir> <cache-dir> <env-dir>
 
 set -e
 
-echo 'buildpack:' `dirname $0` `pwd` $STACK 
-echo "===" $1 "==="
-ls -l $1
-echo "=== /app/tmp ==="
-find /app/tmp -print 
-echo; echo 
-echo "===" $3 "===" 
-ls -l $3 
-cat $3/BUILDPACK_URL
+BUILDPACK_BINDIR = `dirname $0` 
+BUILDPACK_DIR = `dirname $BUILDPACK_BINDIR`
+APP_DIR = $1
+APP_CACHEDIR = $2
+APP_ENVDIR = $3 
 
-ls -l /tmp/build*
-env 
+# make sure the cache directory is there 
+mkdir -p $APP_CACHEDIR 
 
-mkdir -p "$1/bin/"
-cp "bin/nginx-$STACK" "$1/bin/nginx"
-nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
-echo "-----> nginx-buildpack: Installed ${nginx_version} to app/bin"
-cp bin/start-nginx "$1/bin/"
-echo '-----> nginx-buildpack: Added start-nginx to app/bin'
+# do we need to build nginx? 
+if [! -x $APP_CACHEDIR/bin/nginx ] 
+then
+   echo "-----> tf-nginx-buildpack: No cached nginx binary, building."
+   rm -rf $APP_CACHEDIR/build
+   mkdir -p $APP_CACHEDIR/build
+   $BUILDPACK_DIR/scripts/build_nginx.sh $APP_CACHEDIR
+fi  
 
-mkdir -p "$1/config"
+# if there's no binary now, we're cooked 
+if [! -x $APP_CACHEDIR/bin/nginx ] 
+then
+   echo "-----> tf-nginx-buildpack: nginx build failed"
+   exit 1
+fi  
 
-cp config/mime.types "$1/config/"
-echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
+# otherwise, should be good to install  
+mkdir -p "$APP_DIR/bin/"
+cp "$APP_CACHEDIR/bin/nginx" "$APP_DIR/bin/nginx"
+nginx_version=$("$APP_DIR/bin/nginx" -V 2>&1 | head -1 | awk '{ print $NF }')
+
+echo "-----> tf-nginx-buildpack: Installed ${nginx_version} to app/bin"
+
+cp "$BUILDPACK_BINDIR/start-nginx" "$APP_DIR/bin/"
+
+echo '-----> tf-nginx-buildpack: Added start-nginx to app/bin'
+
+mkdir -p "$APP_DIR/config"
+
+cp "$BUILDPACK_DIR/config/mime.types" "$APP_DIR/config/"
+
+echo '-----> tf-nginx-buildpack: Default mime.types copied to app/config/'
 
 if [[ ! -f $1/config/nginx.conf.erb ]]; then
 	cp config/nginx.conf.erb "$1/config/"
-	echo '-----> nginx-buildpack: Default config copied to app/config.'
+	echo '-----> tf-nginx-buildpack: Default config copied to app/config.'
 else
-	echo '-----> nginx-buildpack: Custom config found in app/config.'
+	echo '-----> tf-nginx-buildpack: Custom config found in app/config.'
 fi
 exit 0
