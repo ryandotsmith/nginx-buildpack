@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo 'buildpack=nginx at=nginx-config'
+
 # Evaluate config to get $PORT
 erb config/nginx.conf.erb > config/nginx.conf
 
@@ -16,12 +18,9 @@ erb config/nginx.conf.erb > config/nginx.conf
 
 
 # Start NGINX
-(
-	# We expect nginx to run in foreground.
-	# We also expect a socket to be at /tmp/nginx.socket.
-	echo 'buildpack=nginx at=nginx-start'
-	bin/nginx -p . -c config/nginx.conf
-) &
-
+# We expect nginx to run in foreground.
+echo 'buildpack=nginx at=nginx-start'
+bin/nginx -p . -c config/nginx.conf
 echo "buildpack=nginx at=exit"
+
 exit 1
