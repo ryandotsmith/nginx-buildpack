@@ -2,7 +2,7 @@
 
 set -e
 
-echo 'buildpack:' $@ `pwd` $STACK 
+echo 'buildpack:' `dirname $0` `pwd` $STACK 
 echo "===" $1 "==="
 ls -l $1
 echo "=== /app/tmp ==="
