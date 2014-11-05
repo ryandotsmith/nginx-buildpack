@@ -46,7 +46,7 @@ cp "$BUILDPACK_DIR/config/mime.types" "$APP_DIR/config/"
 echo '-----> tf-nginx-buildpack: Default mime.types copied to app/config/'
 
 if [[ ! -f $1/config/nginx.conf.erb ]]; then
-	cp config/nginx.conf.erb "$1/config/"
+	cp $BUILDPACK_DIR/config/nginx.conf.erb "$1/config/"
 	echo '-----> tf-nginx-buildpack: Default config copied to app/config.'
 else
 	echo '-----> tf-nginx-buildpack: Custom config found in app/config.'
