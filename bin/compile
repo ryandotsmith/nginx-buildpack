@@ -3,6 +3,13 @@
 set -e
 
 echo 'buildpack:' $@ `pwd` $STACK 
+echo "===" $1 "==="
+ls -l $1
+echo "===" $2 "==="
+ls -l $2 
+echo "===" $3 "===" 
+ls -l $3 
+
 ls -l /tmp/build*
 env 
 
