@@ -6,7 +6,8 @@ echo 'buildpack:' $@ `pwd` $STACK
 echo "===" $1 "==="
 ls -l $1
 echo "=== /app/tmp ==="
-ls -l  /app/tmp
+find /app/tmp -print 
+echo; echo 
 echo "===" $3 "===" 
 ls -l $3 
 
