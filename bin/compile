@@ -5,8 +5,8 @@ set -e
 echo 'buildpack:' $@ `pwd` $STACK 
 echo "===" $1 "==="
 ls -l $1
-echo "===" $2 "==="
-ls -l $2 
+echo "=== /app/tmp ==="
+ls -l  /app/tmp
 echo "===" $3 "===" 
 ls -l $3 
 
