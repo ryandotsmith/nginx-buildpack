@@ -13,7 +13,7 @@ APP_ENVDIR=$3
 mkdir -p $APP_CACHEDIR 
 
 # do we need to build nginx? 
-if [ ! -x $APP_CACHEDIR/bin/nginx ] 
+if [ ! -x $APP_CACHEDIR/sbin/nginx ] 
 then
    echo "-----> tf-nginx-buildpack: No cached nginx binary, building."
    rm -rf $APP_CACHEDIR/build
@@ -22,7 +22,7 @@ then
 fi  
 
 # if there's no binary now, we're cooked 
-if [ ! -x $APP_CACHEDIR/bin/nginx ] 
+if [ ! -x $APP_CACHEDIR/sbin/nginx ] 
 then
    echo "-----> tf-nginx-buildpack: nginx build failed"
    exit 1
@@ -30,7 +30,7 @@ fi
 
 # otherwise, should be good to install  
 mkdir -p "$APP_DIR/bin/"
-cp "$APP_CACHEDIR/bin/nginx" "$APP_DIR/bin/nginx"
+cp "$APP_CACHEDIR/sbin/nginx" "$APP_DIR/bin/nginx"
 nginx_version=$("$APP_DIR/bin/nginx" -V 2>&1 | head -1 | awk '{ print $NF }')
 
 echo "-----> tf-nginx-buildpack: Installed ${nginx_version} to app/bin"
