@@ -50,7 +50,11 @@ heroku-repo tool:
 https://github.com/heroku/heroku-repo
 
 It adds a command to the heroku command line app to flush the 
-buildpack cache.
+buildpack cache:
+
+```
+   $ heroku repo:purge_cache --app <appname>
+```
 
 The file 'config/nginx.conf.erb' will be processed through `erb`
 to create `nginx.conf`.  The only thing that `erb` is really

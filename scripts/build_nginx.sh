@@ -36,6 +36,7 @@ echo "Starting build..."
 	cd nginx-${NGINX_VERSION}
 	./configure \
 		--with-pcre=pcre-${PCRE_VERSION} \
+		--with-http_ssl_module \
 		--prefix=${INSTALL_ROOT} \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
 	make install
