@@ -10,6 +10,7 @@ find /app/tmp -print
 echo; echo 
 echo "===" $3 "===" 
 ls -l $3 
+cat $3/BUILDPACK_URL
 
 ls -l /tmp/build*
 env 
