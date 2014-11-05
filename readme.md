@@ -1,11 +1,18 @@
-## Heroku Buildpack: NGINX
+## Heroku Buildpack: nginx
 
 This buildpack was forked from
 https://github.com/ryandotsmith/nginx-buildpack but is taking
 a slightly different approach by now.  
 
-The basic idea: build from source and install NGINX inside a dyno
-and allow that dyno to configure its operation. 
+The basic idea: 
+ * Build nginx and dependencies from source 
+ * Install nginx inside the target app
+ * Allow that dyno to configure nginx operation. 
+
+The original repo was focused on running nginx AND another app
+server in the target dyno, and synchronizing start and exit for
+both.  This version is for nginx alone, serving static content or
+proxying or whatever.
 
 ### Versions
 
@@ -20,13 +27,36 @@ All are fetched from their authoritative homes (URLs configured
 in build_nginx.sh as well).  Build is cached in the app cache 
 so it should only compile nginx the first time you run it.  
 
-To clear the cache and force a rebuild (say, for a new version of 
-nginx) you can install the heroku-repo tool: 
+### Usage 
+
+To create a new app using this buildpack, clone your app's
+repository and make sure you have a config/nginx.conf.erb.  From
+within the clone:
+
+```
+   $ heroku create --buildpack http://github.com/Thinkful/nginx-buildpack.git
+   $ git push heroku master
+```
+(heroku magically creates a remote called 'heroku')
+
+You should see the buildpack download, build, and install nginx
+and its dependencies.  
+
+The built files will be cached by Heroku so it won't build every
+time you push a change to your app.  To clear the cache and force
+a rebuild (say, for a new version of nginx) you can install the
+heroku-repo tool: 
 
 https://github.com/heroku/heroku-repo
 
 It adds a command to the heroku command line app to flush the 
 buildpack cache.
+
+The file 'config/nginx.conf.erb' will be processed through `erb`
+to create `nginx.conf`.  The only thing that `erb` is really
+getting you is the expansion of the PORT variable but that's
+necessary.  If you want to change the buildpack to use something 
+besides erb, look in bin/start-nginx and scripts/build_nginx.sh 
 
 ### Features
 
@@ -72,6 +102,10 @@ file](https://github.com/ryandotsmith/nginx-buildpack/blob/master/config/nginx.c
 See [scripts/build_nginx.sh](scripts/build_nginx.sh) for the
 build steps. Configuring is as easy as changing the "./configure"
 options.
+
+### Blame 
+
+Bill Gribble <bill@thinkful.com>
 
 ### License
 
