@@ -7,7 +7,7 @@ a slightly different approach by now.
 The basic idea: 
  * Build nginx and dependencies from source 
  * Install nginx inside the target app
- * Allow that dyno to configure nginx operation. 
+ * Allow the target app to configure nginx operation. 
 
 The original repo was focused on running nginx AND another app
 server in the target dyno, and synchronizing start and exit for
