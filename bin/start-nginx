@@ -3,6 +3,7 @@
 echo 'buildpack=nginx at=nginx-config'
 
 # Evaluate config to get $PORT
+echo 'buildpack=nginx port=$PORT'
 erb config/nginx.conf.erb > config/nginx.conf
 
 # Start log redirection.
