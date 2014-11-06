@@ -3,20 +3,17 @@
 echo 'buildpack=nginx at=nginx-config'
 
 # Evaluate config to get $PORT
-echo 'buildpack=nginx port=$PORT'
+echo 'buildpack=nginx port=' $PORT
 erb config/nginx.conf.erb > config/nginx.conf
 
-# Start log redirection.
-(
-	# Initialize log directory.
-	mkdir -p logs/nginx
-	touch logs/nginx/access.log logs/nginx/error.log
+# make sure we have a place for logs 
+mkdir -p logs/nginx
+touch logs/nginx/access.log logs/nginx/error.log
 
-	# Redirect NGINX logs to stdout.
-	echo 'buildpack=nginx at=logs-initialized'
-	tail -qF -n 0 logs/nginx/*.log
-) &
+echo 'buildpack=nginx at=logs-initialized'
 
+# Redirect NGINX logs to stdout.
+tail -qF -n 0 logs/nginx/*.log &
 
 # Start NGINX
 # We expect nginx to run in foreground.
