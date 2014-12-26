@@ -46,7 +46,6 @@ then
 	#are app is ready for traffic.
 	while [[ ! -f "$FILE" ]]
 	do
-		echo 'buildpack=nginx at=app-initialization'
 		sleep 1
 	done
 	echo 'buildpack=nginx at=app-initialized'
