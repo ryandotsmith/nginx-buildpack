@@ -53,8 +53,8 @@ echo "Downloading $resty_url"
 		--prefix=/tmp/nginx \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/nginx-upload-module-${UPLOAD_VERSION} \
-		--add_module=/${temp_dir}/ngx_openresty-${RESTY_VERSION}/bundle/echo-nginx-module-0.56 \
-		--add_module=/${temp_dir}/ngx_openresty-${RESTY_VERSION}/bundle/set-misc-nginx-module-0.26
+		--add-module=/${temp_dir}/ngx_openresty-${RESTY_VERSION}/bundle/echo-nginx-module-0.56 \
+		--add-module=/${temp_dir}/ngx_openresty-${RESTY_VERSION}/bundle/set-misc-nginx-module-0.26
 	make install
 )
 
