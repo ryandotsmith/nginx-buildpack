@@ -13,12 +13,13 @@ NGINX_VERSION=1.6.2
 PCRE_VERSION=8.21
 HEADERS_MORE_VERSION=0.23
 UPLOAD_VERSION=2.2
-
+RESTY_VERSION=1.7.4.1
 
 nginx_tarball_url=http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 pcre_tarball_url=http://garr.dl.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2
 headers_more_nginx_module_url=https://github.com/agentzh/headers-more-nginx-module/archive/v${HEADERS_MORE_VERSION}.tar.gz
 upload_module_url=https://github.com/vkholodkov/nginx-upload-module/archive/${UPLOAD_VERSION}.tar.gz
+resty_url=http://openresty.org/download/ngx_openresty-${RESTY_VERSION}.tar.gz
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
@@ -41,6 +42,9 @@ echo "Downloading $headers_more_nginx_module_url"
 echo "Downloading $upload_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $upload_module_url | tar xvz)
 
+echo "Downloading $resty_url"
+(curl -L $resty_url | tar xvz)
+
 (
 	cd nginx-${NGINX_VERSION}
 	./configure \
@@ -48,7 +52,9 @@ echo "Downloading $upload_module_url"
 		--with-http_auth_request_module \
 		--prefix=/tmp/nginx \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
-		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/nginx-upload-module-${UPLOAD_VERSION}
+		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/nginx-upload-module-${UPLOAD_VERSION} \
+		--add_module=/${temp_dir}/ngx_openresty-${RESTY_VERSION}/echo-nginx-module-0.56 \
+		--add_module=/${temp_dir}/ngx_openresty-${RESTY_VERSION}/set-misc-nginx-module-0.26
 	make install
 )
 
