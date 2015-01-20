@@ -14,10 +14,11 @@ mkdir -p "$1/config"
 cp config/mime.types "$1/config/"
 echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
 
-if [[ ! -f $1/config/nginx.conf.erb ]]; then
+if [[ -f $1/nginx.conf.erb ]]; then
+	cp $1/nginx.conf.erb "$1/config/"
+	echo '-----> nginx-buildpack: Custom config found in app/.'
+else
 	cp config/nginx.conf.erb "$1/config/"
 	echo '-----> nginx-buildpack: Default config copied to app/config.'
-else
-	echo '-----> nginx-buildpack: Custom config found in app/config.'
 fi
 exit 0
