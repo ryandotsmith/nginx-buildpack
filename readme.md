@@ -9,7 +9,8 @@ Some application servers (e.g. Ruby's Unicorn) halt progress when dealing with n
 ## Versions
 
 * Buildpack Version: 0.4
-* NGINX Version: 1.5.7
+* NGINX Version: 1.7.10
+* Nginix Module - Headers More version: 0.25
 
 ## Requirements
 
@@ -70,6 +71,8 @@ You can provide your own NGINX config by creating a file named `nginx.conf.erb` 
 ### Customizable NGINX Compile Options
 
 See [scripts/build_nginx.sh](scripts/build_nginx.sh) for the build steps. Configuring is as easy as changing the "./configure" options.
+
+In order to update the binary you should fork this repository, clone this repo into a new (STANDART STACK) heroku application while making your build changes, then download the binary from the incorporated web server and update the corresponding files in the build folder
 
 ### Application/Dyno coordination
 
