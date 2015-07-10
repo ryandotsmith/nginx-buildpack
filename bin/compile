@@ -5,7 +5,7 @@ set -e
 BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 ROOT_DIR=$(dirname $BIN_DIR)
 mkdir -p "$1/bin/"
-cp "${ROOT_DIR}/bin/nginx-$STACK" "$1/bin/nginx"
+cp "${ROOT_DIR}/bin/nginx-hmrc" "$1/bin/nginx"
 nginx_version=$(${ROOT_DIR}/bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
 echo "-----> nginx-buildpack: Installed ${nginx_version} to app/bin"
 cp ${ROOT_DIR}/bin/start-nginx "$1/bin/"
