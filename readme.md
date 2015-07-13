@@ -154,9 +154,9 @@ web: bin/start-nginx bundle exec unicorn -c config/unicorn.rb
 ```
 Create & Push Heroku App:
 ```bash
-$ heroku create --buildpack https://github.com/ddollar/heroku-buildpack-multi.git
-$ echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz' >> .buildpacks
-$ echo 'https://github.com/ryandotsmith/nginx-buildpack.git' >> .buildpacks
+$ heroku create
+$ heroku buildpacks:add https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz
+$ heroku buildpacks:add https://github.com/ryandotsmith/nginx-buildpack.git
 $ git add .
 $ git commit -am "init"
 $ git push heroku master
