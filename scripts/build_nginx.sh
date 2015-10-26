@@ -6,7 +6,7 @@
 # We would like to build an NGINX binary for the buildpack on the
 # exact machine in which the binary will run.
 
-NGINX_VERSION=1.6.2
+NGINX_VERSION=1.8.0
 PCRE_VERSION=8.36
 HEADERS_MORE_VERSION=0.25
 
