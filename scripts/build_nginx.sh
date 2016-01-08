@@ -9,7 +9,7 @@
 # Once the dyno has is 'up' you can open your browser and navigate
 # this dyno's directory structure to download the nginx binary.
 
-NGINX_VERSION=${NGINX_VERSION-1.9.5}
+NGINX_VERSION=${NGINX_VERSION-1.9.9}
 PCRE_VERSION=${PCRE_VERSION-8.37}
 HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.26}
 
@@ -42,7 +42,8 @@ echo "Downloading $headers_more_nginx_module_url"
 		--prefix=/tmp/nginx \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
         --with-http_v2_module \
-        --with-http_ssl_module
+        --with-http_ssl_module \
+        --with-http_stub_status_module
 	make install
 )
 
