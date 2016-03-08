@@ -8,7 +8,7 @@ mkfifo $psmgr
 erb config/nginx.conf.erb > config/nginx.conf
 
 n=1
-while getopts :f:n option "${@:1:3}"
+while getopts :fn option "${@:1:2}"
 do
         case "${option}"
         in
