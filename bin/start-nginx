@@ -8,11 +8,12 @@ mkfifo $psmgr
 erb config/nginx.conf.erb > config/nginx.conf
 
 n=1
-while getopts :f option ${@:1:2}
+while getopts :fn option "${@:1:2}"
 do
         case "${option}"
         in
                 f) FORCE=$OPTIND; n=$((n+1));;
+                n) NO_SERVER=$OPTIND; n=$((n+1));;
         esac
 done
 
@@ -28,15 +29,20 @@ echo 'buildpack=nginx at=logs-initialized'
 	echo 'logs' >$psmgr
 ) &
 
+if [[ -z "$NO_SERVER" ]]
+then
+
 #Start App Server
 (
 	#Take the command passed to this bin and start it.
 	#E.g. bin/start-nginx bundle exec unicorn -c config/unicorn.rb
-        COMMAND=${@:$n}
+        COMMAND=${*:$n}
 	echo "buildpack=nginx at=start-app cmd=$COMMAND"
 	$COMMAND
 	echo 'app' >$psmgr
 ) &
+
+fi
 
 if [[ -z "$FORCE" ]]
 then
