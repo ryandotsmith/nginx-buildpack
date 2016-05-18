@@ -10,10 +10,10 @@ erb config/nginx.conf.erb > config/nginx.conf
 n=1
 while getopts :f option ${@:1:2}
 do
-        case "${option}"
-        in
-                f) FORCE=$OPTIND; n=$((n+1));;
-        esac
+    case "${option}"
+    in
+        f) FORCE=$OPTIND; n=$((n+1));;
+    esac
 done
 
 #Initialize log directory.
@@ -23,42 +23,42 @@ echo 'buildpack=nginx at=logs-initialized'
 
 #Start log redirection.
 (
-	#Redirect NGINX logs to stdout.
-	tail -qF -n 0 logs/nginx/*.log
-	echo 'logs' >$psmgr
+    # Redirect NGINX logs to stdout.
+    tail -qF -n 0 logs/nginx/*.log
+    echo 'logs' >$psmgr
 ) &
 
 #Start App Server
 (
-	#Take the command passed to this bin and start it.
-	#E.g. bin/start-nginx bundle exec unicorn -c config/unicorn.rb
-        COMMAND=${@:$n}
-	echo "buildpack=nginx at=start-app cmd=$COMMAND"
-	$COMMAND
-	echo 'app' >$psmgr
+    # Take the command passed to this bin and start it.
+    # E.g. bin/start-nginx bundle exec unicorn -c config/unicorn.rb
+    COMMAND=${@:$n}
+    echo "buildpack=nginx at=start-app cmd=$COMMAND"
+    $COMMAND
+    echo 'app' >$psmgr
 ) &
 
 if [[ -z "$FORCE" ]]
 then
-	FILE="/tmp/app-initialized"
+    FILE="/tmp/app-initialized"
 
-	#We block on app-initialized so that when NGINX binds to $PORT
-	#are app is ready for traffic.
-	while [[ ! -f "$FILE" ]]
-	do
-		echo 'buildpack=nginx at=app-initialization'
-		sleep 1
-	done
-	echo 'buildpack=nginx at=app-initialized'
+    # We block on app-initialized so that when NGINX binds to $PORT
+    # are app is ready for traffic.
+    while [[ ! -f "$FILE" ]]
+    do
+        echo 'buildpack=nginx at=app-initialization'
+        sleep 1
+    done
+    echo 'buildpack=nginx at=app-initialized'
 fi
 
 #Start NGINX
 (
-	#We expect nginx to run in foreground.
-	#We also expect a socket to be at /tmp/nginx.socket.
-	echo 'buildpack=nginx at=nginx-start'
-	bin/nginx -p . -c config/nginx.conf
-	echo 'nginx' >$psmgr
+    # We expect nginx to run in foreground.
+    # We also expect a socket to be at /tmp/nginx.socket.
+    echo 'buildpack=nginx at=nginx-start'
+    bin/nginx -p . -c config/nginx.conf
+    echo 'nginx' >$psmgr
 ) &
 
 #This read will block the process waiting on a msg to be put into the fifo.

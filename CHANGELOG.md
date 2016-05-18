@@ -1,3 +1,10 @@
+## v0.5
+
+2015-05-09
+
+* Update nginx to 1.8.0
+* add gzip static module
+
 ## v0.4
 
 2012-05-13
