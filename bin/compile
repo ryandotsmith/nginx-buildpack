@@ -1,23 +1,33 @@
 #!/usr/bin/env bash
+# Usage: bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+# https://devcenter.heroku.com/articles/buildpack-api#bin-compile
 
 set -e
 
-mkdir -p "$1/bin/"
-cp "bin/nginx-$STACK" "$1/bin/nginx"
-nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
-echo "-----> nginx-buildpack: Installed ${nginx_version} to app/bin"
-cp bin/start-nginx "$1/bin/"
-echo '-----> nginx-buildpack: Added start-nginx to app/bin'
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+echo "-----> nginx-buildpack: BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=$ENV_DIR"
 
-mkdir -p "$1/config"
-
-cp config/mime.types "$1/config/"
-echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
-
-if [[ ! -f $1/config/nginx.conf.erb ]]; then
-	cp config/nginx.conf.erb "$1/config/"
-	echo '-----> nginx-buildpack: Default config copied to app/config.'
-else
-	echo '-----> nginx-buildpack: Custom config found in app/config.'
-fi
 exit 0
+
+
+# mkdir -p "$1/bin/"
+# cp "bin/nginx-$STACK" "$1/bin/nginx"
+# nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
+# echo "-----> nginx-buildpack: Installed ${nginx_version} to app/bin"
+# cp bin/start-nginx "$1/bin/"
+# echo '-----> nginx-buildpack: Added start-nginx to app/bin'
+#
+# mkdir -p "$1/config"
+#
+# cp config/mime.types "$1/config/"
+# echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
+#
+# if [[ ! -f $1/config/nginx.conf.erb ]]; then
+# 	cp config/nginx.conf.erb "$1/config/"
+# 	echo '-----> nginx-buildpack: Default config copied to app/config.'
+# else
+# 	echo '-----> nginx-buildpack: Custom config found in app/config.'
+# fi
+# exit 0

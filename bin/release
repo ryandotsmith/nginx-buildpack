@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
+# Usage: bin/release BUILD_DIR
+# https://devcenter.heroku.com/articles/buildpack-api#bin-release
 echo "--- {}"

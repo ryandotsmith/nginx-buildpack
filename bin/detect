@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-# bin/detect <build-dir>
+# Usage: bin/detect BUILD_DIR
+# https://devcenter.heroku.com/articles/buildpack-api#bin-detect
 echo 'nginx-buildpack'
 exit 0

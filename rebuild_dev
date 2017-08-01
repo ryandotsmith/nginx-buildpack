@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo " -> Removing docker images"
+docker rm -vf heroku-nginx-cedar-16
+
+echo " -> Rebuilding the image from current directory"
+docker build -t heroku-nginx-cedar-16 .
+
+echo " -> Run the slave container"
+
+docker run -d --name heroku-nginx-cedar-16 \
+  -p 3001:80 \
+  heroku-nginx-cedar-16
+
+docker ps
+echo " -> Done. To shell into the container: docker exec -i -t heroku-nginx-cedar-16 bash"
