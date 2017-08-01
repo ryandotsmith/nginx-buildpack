@@ -2,10 +2,12 @@
 # https://hub.docker.com/r/heroku/heroku/
 FROM heroku/heroku:16
 
-ENV LAST_UPDATED 20170801
+ENV LAST_UPDATED 2017080104
 
 # https://devcenter.heroku.com/articles/buildpack-api#stacks
 ENV STACK heroku-16
+
+RUN mkdir /var/buildpack_cache
 
 COPY bin/detect /usr/bin/buildpack-detect
 RUN buildpack-detect /var/dummy_app
