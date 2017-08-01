@@ -14,7 +14,8 @@ echo "-----> nginx-buildpack: NGINX_VERSION=$NGINX_VERSION STACK=$STACK"
 
 # temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
-cd $CACHE_DIR
+mkdir -p $CACHE_DIR/$STACK
+cd $CACHE_DIR/$STACK
 
 curl http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz | tar xz
 
