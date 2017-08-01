@@ -2,14 +2,16 @@
 
 Nginx-buildpack vendors NGINX inside a dyno and connects NGINX to an app server via UNIX domain sockets.
 
+## Changes compared to ryandotsmith/nginx-buildpack
+
+- [ ] Leverage Heroku's cache directory to build and store nginx binaries in, so that we don't have to vendor the binaries manually inside the repo.
+- [ ] Add GeoIP2 support.
+- [ ] Use NGINX_VERSION env variable for builds.
+- [ ] Update README with examples for Puma.
+
 ## Motivation
 
 Some application servers (e.g. Ruby's Unicorn) halt progress when dealing with network I/O. Heroku's Cedar routing stack [buffers only the headers](https://devcenter.heroku.com/articles/http-routing#request-buffering) of inbound requests. (The Cedar router will buffer the headers and body of a response up to 1MB) Thus, the Heroku router engages the dyno during the entire body transfer –from the client to dyno. For applications servers with blocking I/O, the latency per request will be degraded by the content transfer. By using NGINX in front of the application server, we can eliminate a great deal of transfer time from the application server. In addition to making request body transfers more efficient, all other I/O should be improved since the application server need only communicate with a UNIX socket on localhost. Basically, for webservers that are not designed for efficient, non-blocking I/O, we will benefit from having NGINX to handle all I/O operations.
-
-## Versions
-
-* Buildpack Version: 0.4
-* NGINX Version: 1.5.7
 
 ## Requirements
 
