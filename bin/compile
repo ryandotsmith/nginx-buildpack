@@ -12,17 +12,6 @@ echo "-----> nginx-buildpack: BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=
 NGINX_VERSION=$(cat $ENV_DIR/NGINX_VERSION)
 echo "-----> nginx-buildpack: NGINX_VERSION=$NGINX_VERSION STACK=$STACK"
 
-# Install prerequisites (this throws 'Unable to locate package' currenly)
-# apt-get install -y wget \
-#                    curl \
-#                    git \
-#                    build-essential \
-#                    autoconf \
-#                    libtool \
-#                    libpcre3 \
-#                    libpcre3-dev \
-#                    libssl-dev
-
 # temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
 cd $CACHE_DIR
@@ -34,19 +23,6 @@ cd nginx-$NGINX_VERSION
 # Compile Nginx
 ./configure \
     --prefix=/tmp/nginx \
-    --sbin-path=/usr/sbin/nginx \
-    --conf-path=/etc/nginx/nginx.conf \
-    --error-log-path=/var/log/nginx/error.log \
-    --http-log-path=/var/log/nginx/access.log \
-    --pid-path=/var/run/nginx.pid \
-    --lock-path=/var/run/nginx.lock \
-    --http-client-body-temp-path=/var/cache/nginx/client_temp \
-    --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
-    --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
-    --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
-    --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
-    --user=nginx \
-    --group=nginx \
     --with-http_ssl_module \
     --with-http_realip_module \
     --with-http_addition_module \
@@ -64,7 +40,8 @@ cd nginx-$NGINX_VERSION
     --with-file-aio \
     --with-cc-opt='-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2' \
     --with-ld-opt='-Wl,-z,relro -Wl,--as-needed' \
-    --with-ipv6
+    --with-ipv6 \
+    --add-module=/ngx_http_geoip2_module
 
 make
 make install

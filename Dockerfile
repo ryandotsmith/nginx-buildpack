@@ -1,36 +1,36 @@
-# cedar-16 stack
-# https://hub.docker.com/r/heroku/heroku/
-FROM heroku/heroku:16
+# Emulate cedar-16 stack: https://devcenter.heroku.com/articles/stack
+FROM ubuntu:xenial
 
-ENV LAST_UPDATED 2017080104
+# Install prerequisites (these are available on Heroku)
+RUN apt-get update
+RUN apt-get install -y wget \
+                       curl \
+                       git \
+                       build-essential \
+                       autoconf \
+                       libtool \
+                       libpcre3 \
+                       libpcre3-dev \
+                       libssl-dev
+
+ENV LAST_UPDATED 20170801
 
 # https://devcenter.heroku.com/articles/buildpack-api#stacks
 ENV STACK heroku-16
 
-RUN mkdir /var/buildpack_cache
-
-COPY bin/detect /usr/bin/buildpack-detect
-RUN buildpack-detect /var/dummy_app
-
-COPY buildpack_env /var/buildpack_env
-COPY bin/compile /usr/bin/buildpack-release
-RUN buildpack-release /var/dummy_app /var/buildpack_cache /var/buildpack_env
-
-COPY bin/release /usr/bin/buildpack-release
-RUN buildpack-release /var/dummy_app
-
-
-# install required software
-# RUN apt-get install -y wget \
-#                        curl \
-#                        git \
-#                        build-essential \
-#                        autoconf \
-#                        libtool \
-#                        libpcre3 \
-#                        libpcre3-dev \
-#                        libssl-dev
+# RUN mkdir /var/buildpack_cache
 #
+# COPY bin/detect /usr/bin/buildpack-detect
+# RUN buildpack-detect /var/dummy_app
+#
+# COPY buildpack_env /var/buildpack_env
+# COPY bin/compile /usr/bin/buildpack-release
+# RUN buildpack-release /var/dummy_app /var/buildpack_cache /var/buildpack_env
+#
+# COPY bin/release /usr/bin/buildpack-release
+# RUN buildpack-release /var/dummy_app
+
+
 # # Download MaxMind GeoLite2 databases
 # RUN mkdir -p /usr/share/GeoIP/ &&\
 #     wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz &&\
