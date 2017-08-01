@@ -33,7 +33,7 @@ cd nginx-$NGINX_VERSION
 
 # Compile Nginx
 ./configure \
-    --prefix=/etc/nginx \
+    --prefix=/tmp/nginx \
     --sbin-path=/usr/sbin/nginx \
     --conf-path=/etc/nginx/nginx.conf \
     --error-log-path=/var/log/nginx/error.log \
