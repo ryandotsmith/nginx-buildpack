@@ -9,6 +9,9 @@ CACHE_DIR=$2
 ENV_DIR=$3
 echo "-----> nginx-buildpack: BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=$ENV_DIR"
 
+NGINX_VERSION=$(cat $ENV_DIR/NGINX_VERSION)
+echo "-----> nginx-buildpack: NGINX_VERSION=$NGINX_VERSION STACK=$STACK"
+
 exit 0
 
 

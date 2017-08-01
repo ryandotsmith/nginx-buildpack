@@ -4,6 +4,9 @@ FROM heroku/heroku:16
 
 ENV LAST_UPDATED 20170801
 
+# https://devcenter.heroku.com/articles/buildpack-api#stacks
+ENV STACK heroku-16
+
 COPY bin/detect /usr/bin/buildpack-detect
 RUN buildpack-detect /var/dummy_app
 
@@ -95,4 +98,5 @@ RUN buildpack-release /var/dummy_app
 # COPY config/includes /etc/nginx/includes
 # COPY config/nginx.conf /etc/nginx/nginx.conf
 
-CMD /bin/bash -c "echo 'try to run nginx here'"
+# CMD "/var/dummy_app/bin/start-nginx bundle exec puma -C puma.rb -b unix:///tmp/nginx.socket"
+CMD "nginx -g 'daemon off;'"
