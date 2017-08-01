@@ -4,8 +4,15 @@ FROM heroku/heroku:16
 
 ENV LAST_UPDATED 20170801
 
-ENV NGINX_VERSION 1.12.1
-ENV STACK heroku-16
+COPY bin/detect /usr/bin/buildpack-detect
+RUN buildpack-detect /var/dummy_app
+
+COPY buildpack_env /var/buildpack_env
+COPY bin/compile /usr/bin/buildpack-release
+RUN buildpack-release /var/dummy_app /var/buildpack_cache /var/buildpack_env
+
+COPY bin/release /usr/bin/buildpack-release
+RUN buildpack-release /var/dummy_app
 
 
 # install required software
