@@ -2,8 +2,11 @@
 # https://hub.docker.com/r/heroku/heroku/
 FROM heroku/heroku:16
 
-ENV NGINX_VERSION 1.12.1
 ENV LAST_UPDATED 20170801
+
+ENV NGINX_VERSION 1.12.1
+ENV STACK heroku-16
+
 
 # install required software
 # RUN apt-get install -y wget \
