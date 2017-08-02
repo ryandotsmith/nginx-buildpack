@@ -4,10 +4,10 @@ Nginx-buildpack vendors NGINX inside a dyno and connects NGINX to an app server 
 
 ## Changes compared to ryandotsmith/nginx-buildpack
 
-- [ ] Provide a Dockerfile and document a local build / modification workflow, to improve the development of the buildpack.
-- [ ] Leverage Heroku's cache directory to build and store nginx binaries in, so that we don't have to vendor the binaries manually inside the repo.
-- [ ] Add GeoIP2 support.
-- [ ] Use NGINX_VERSION env variable for builds.
+- [x] Provide a Dockerfile and document a local build / modification workflow, to improve the development of the buildpack.
+- [x] Leverage Heroku's cache directory to build and store nginx binaries in, so that we don't have to vendor the binaries manually inside the repo.
+- [x] Add GeoIP2 support.
+- [x] Use NGINX_VERSION env variable for builds.
 - [ ] Update README with examples for Puma.
 
 ## Motivation
