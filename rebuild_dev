@@ -8,11 +8,16 @@ docker build -t heroku-nginx-cedar-16 .
 
 echo " -> Run the slave container"
 
-docker run -d --name heroku-nginx-cedar-16 \
+# docker run -d --name heroku-nginx-cedar-16 \
+#   -p 3001:80 \
+#   heroku-nginx-cedar-16
+#
+# docker ps
+# echo " -> Done. To shell into the container: docker exec -i -t heroku-nginx-cedar-16 bash"
+
+docker run -it --rm --name heroku-nginx-cedar-16 \
   -p 3001:80 \
-  heroku-nginx-cedar-16
+  -v /Users/klevo/www/nginx-buildpack/bin:/var/dummy_app/bin \
+  heroku-nginx-cedar-16 bash
 
 # -v /tmp/buildpack_cache:/var/buildpack_cache \
-
-docker ps
-echo " -> Done. To shell into the container: docker exec -i -t heroku-nginx-cedar-16 bash"

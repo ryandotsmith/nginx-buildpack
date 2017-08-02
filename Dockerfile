@@ -18,16 +18,16 @@ ENV LAST_UPDATED 20170801
 # https://devcenter.heroku.com/articles/buildpack-api#stacks
 ENV STACK heroku-16
 
-# RUN mkdir /var/buildpack_cache
-#
-# COPY bin/detect /usr/bin/buildpack-detect
+RUN mkdir /var/buildpack_cache
+
+COPY bin/detect /usr/bin/buildpack-detect
 # RUN buildpack-detect /var/dummy_app
-#
-# COPY buildpack_env /var/buildpack_env
-# COPY bin/compile /usr/bin/buildpack-release
+
+COPY buildpack_env /var/buildpack_env
+COPY bin/compile /usr/bin/buildpack-release
 # RUN buildpack-release /var/dummy_app /var/buildpack_cache /var/buildpack_env
-#
-# COPY bin/release /usr/bin/buildpack-release
+
+COPY bin/release /usr/bin/buildpack-release
 # RUN buildpack-release /var/dummy_app
 
 
