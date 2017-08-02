@@ -12,44 +12,61 @@ echo "-----> nginx-buildpack: BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=
 NGINX_VERSION=$(cat $ENV_DIR/NGINX_VERSION)
 echo "-----> nginx-buildpack: NGINX_VERSION=$NGINX_VERSION STACK=$STACK"
 
+FINAL_NGINX_BINARY=$CACHE_DIR/$STACK/nginx
+
 # temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
 mkdir -p $CACHE_DIR/$STACK
 cd $CACHE_DIR/$STACK
 
-curl http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz | tar xz
+# Install C library for reading MaxMind DB files
+# Resource: https://github.com/maxmind/libmaxminddb
+if [ ! -d "libmaxminddb" ]; then
+  git clone --recursive https://github.com/maxmind/libmaxminddb.git
+fi
 
+cd libmaxminddb
+./bootstrap
+./configure
+make
+make check
+make install
+echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf
+ldconfig
+
+cd $CACHE_DIR/$STACK
+
+# Get the geoip2 nginx module
+if [ ! -d "ngx_http_geoip2_module" ]; then
+  git clone https://github.com/leev/ngx_http_geoip2_module.git
+fi
+
+wget -c http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz
+tar xzf nginx-$NGINX_VERSION.tar.gz
 cd nginx-$NGINX_VERSION
 
-# Compile Nginx
+# Compile nginx
 ./configure \
     --prefix=/tmp/nginx \
     --with-http_ssl_module \
     --with-http_realip_module \
-    --with-http_addition_module \
-    --with-http_sub_module \
-    --with-http_dav_module \
-    --with-http_gunzip_module \
     --with-http_gzip_static_module \
-    --with-http_random_index_module \
-    --with-http_secure_link_module \
-    --with-http_stub_status_module \
     --with-http_auth_request_module \
-    --with-threads \
-    --with-stream \
-    --with-stream_ssl_module \
-    --with-file-aio \
-    --with-cc-opt='-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2' \
-    --with-ld-opt='-Wl,-z,relro -Wl,--as-needed' \
-    --with-ipv6 \
-    --add-module=/ngx_http_geoip2_module
-
+    --add-module=../ngx_http_geoip2_module
 make
 make install
 
+# Clean up the compile dir
+cd $CACHE_DIR/$STACK
+rm -rf nginx-$NGINX_VERSION
+
+# Copy the resulting binary to the cache dir
+cp /tmp/nginx/sbin/nginx $FINAL_NGINX_BINARY
+echo "-----> nginx-buildpack: nginx $NGINX_VERSION for $STACK compiled and placed into $FINAL_NGINX_BINARY"
+
 exit 0
 
-cd BUILD_DIR
+cd $BUILD_DIR
 # mkdir -p "$1/bin/"
 # cp "bin/nginx-$STACK" "$1/bin/nginx"
 # nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')

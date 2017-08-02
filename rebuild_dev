@@ -18,6 +18,7 @@ echo " -> Run the slave container"
 docker run -it --rm --name heroku-nginx-cedar-16 \
   -p 3001:80 \
   -v /Users/klevo/www/nginx-buildpack/bin:/var/dummy_app/bin \
+  -v /tmp/buildpack_cache:/var/buildpack_cache \
   heroku-nginx-cedar-16 bash
 
 # -v /tmp/buildpack_cache:/var/buildpack_cache \

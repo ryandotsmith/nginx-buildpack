@@ -24,8 +24,8 @@ COPY bin/detect /usr/bin/buildpack-detect
 # RUN buildpack-detect /var/dummy_app
 
 COPY buildpack_env /var/buildpack_env
-COPY bin/compile /usr/bin/buildpack-release
-# RUN buildpack-release /var/dummy_app /var/buildpack_cache /var/buildpack_env
+COPY bin/compile /usr/bin/buildpack-compile
+# RUN buildpack-compile /var/dummy_app /var/buildpack_cache /var/buildpack_env
 
 COPY bin/release /usr/bin/buildpack-release
 # RUN buildpack-release /var/dummy_app
