@@ -13,6 +13,9 @@ RUN apt-get install -y wget \
                        libpcre3-dev \
                        libssl-dev
 
+# To get `erb` like on Heroku
+RUN apt-get install -y ruby-full
+
 ENV LAST_UPDATED 20170801
 
 # https://devcenter.heroku.com/articles/buildpack-api#stacks
