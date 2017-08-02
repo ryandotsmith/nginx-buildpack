@@ -24,40 +24,17 @@ else
   mkdir -p $CACHE_DIR/$STACK
   cd $CACHE_DIR/$STACK
 
-  # Install C library for reading MaxMind DB files
-  # Resource: https://github.com/maxmind/libmaxminddb
-  if [ ! -d "libmaxminddb" ]; then
-    git clone --recursive https://github.com/maxmind/libmaxminddb.git
-  fi
-
-  cd libmaxminddb
-  ./bootstrap
-  ./configure --prefix=/tmp/libmaxminddb
-  make
-  make check
-  make install
-
-  cd $CACHE_DIR/$STACK
-
-  # Get the geoip2 nginx module
-  if [ ! -d "ngx_http_geoip2_module" ]; then
-    git clone https://github.com/leev/ngx_http_geoip2_module.git
-  fi
-
   wget -c http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz
   tar xzf nginx-$NGINX_VERSION.tar.gz
   cd nginx-$NGINX_VERSION
 
   # Compile nginx
   ./configure \
-      --with-ld-opt="-L /tmp/libmaxminddb/lib" \
-      --with-cc-opt="-I /tmp/libmaxminddb/include" \
       --prefix=/tmp/nginx \
       --with-http_ssl_module \
       --with-http_realip_module \
       --with-http_gzip_static_module \
-      --with-http_auth_request_module \
-      --add-module=../ngx_http_geoip2_module
+      --with-http_auth_request_module
   make
   make install
 
