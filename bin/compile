@@ -27,12 +27,10 @@ fi
 
 cd libmaxminddb
 ./bootstrap
-./configure
+./configure --prefix=/tmp/libmaxminddb
 make
 make check
 make install
-echo /usr/local/lib  >> /etc/ld.so.conf.d/local.conf
-ldconfig
 
 cd $CACHE_DIR/$STACK
 
@@ -47,6 +45,8 @@ cd nginx-$NGINX_VERSION
 
 # Compile nginx
 ./configure \
+    --with-ld-opt="-L /tmp/libmaxminddb/lib" \
+    --with-cc-opt="-I /tmp/libmaxminddb/include" \
     --prefix=/tmp/nginx \
     --with-http_ssl_module \
     --with-http_realip_module \
