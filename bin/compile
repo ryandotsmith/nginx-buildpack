@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # Usage: bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+# For example: bin/compile /var/dummy_app /var/buildpack_cache /var/buildpack_env
 # https://devcenter.heroku.com/articles/buildpack-api#bin-compile
 
 set -e
 
+CURRENT_DIR=$(pwd)
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
-# echo "-----> nginx-buildpack: BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=$ENV_DIR"
+echo "-----> nginx-buildpack: CURRENT_DIR=$CURRENT_DIR BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=$ENV_DIR"
 
 NGINX_VERSION=$(cat $ENV_DIR/NGINX_VERSION)
 echo "-----> nginx-buildpack: NGINX_VERSION=$NGINX_VERSION STACK=$STACK"

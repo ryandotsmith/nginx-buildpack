@@ -19,16 +19,12 @@ ENV LAST_UPDATED 20170801
 ENV STACK heroku-16
 
 RUN mkdir /var/buildpack_cache
+RUN mkdir /var/buildpack
 
-COPY bin/detect /usr/bin/buildpack-detect
-# RUN buildpack-detect /var/dummy_app
+COPY dummy_app /var/dummy_app
+COPY config /var/buildpack/config
 
 COPY buildpack_env /var/buildpack_env
-COPY bin/compile /usr/bin/buildpack-compile
-# RUN buildpack-compile /var/dummy_app /var/buildpack_cache /var/buildpack_env
-
-COPY bin/release /usr/bin/buildpack-release
-# RUN buildpack-release /var/dummy_app
 
 
 # # Download MaxMind GeoLite2 databases
