@@ -16,18 +16,6 @@ do
         esac
 done
 
-#Initialize log directory.
-mkdir -p logs/nginx
-touch logs/nginx/access.log logs/nginx/error.log
-echo 'buildpack=nginx at=logs-initialized'
-
-#Start log redirection.
-(
-	#Redirect NGINX logs to stdout.
-	tail -qF -n 0 logs/nginx/*.log
-	echo 'logs' >$psmgr
-) &
-
 #Start App Server
 (
 	#Take the command passed to this bin and start it.
