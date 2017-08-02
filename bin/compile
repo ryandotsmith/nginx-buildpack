@@ -7,76 +7,78 @@ set -e
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
-echo "-----> nginx-buildpack: BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=$ENV_DIR"
+# echo "-----> nginx-buildpack: BUILD_DIR=$BUILD_DIR CACHE_DIR=$CACHE_DIR ENV_DIR=$ENV_DIR"
 
 NGINX_VERSION=$(cat $ENV_DIR/NGINX_VERSION)
 echo "-----> nginx-buildpack: NGINX_VERSION=$NGINX_VERSION STACK=$STACK"
 
 FINAL_NGINX_BINARY=$CACHE_DIR/$STACK/nginx
 
-# temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
+if [ -f $FINAL_NGINX_BINARY ]; then
+  echo "-----> nginx-buildpack: $FINAL_NGINX_BINARY already exists"
+else
+  echo "-----> nginx-buildpack: $FINAL_NGINX_BINARY does not exist. Proceeding to compile it"
 
-mkdir -p $CACHE_DIR/$STACK
-cd $CACHE_DIR/$STACK
+  mkdir -p $CACHE_DIR/$STACK
+  cd $CACHE_DIR/$STACK
 
-# Install C library for reading MaxMind DB files
-# Resource: https://github.com/maxmind/libmaxminddb
-if [ ! -d "libmaxminddb" ]; then
-  git clone --recursive https://github.com/maxmind/libmaxminddb.git
+  # Install C library for reading MaxMind DB files
+  # Resource: https://github.com/maxmind/libmaxminddb
+  if [ ! -d "libmaxminddb" ]; then
+    git clone --recursive https://github.com/maxmind/libmaxminddb.git
+  fi
+
+  cd libmaxminddb
+  ./bootstrap
+  ./configure --prefix=/tmp/libmaxminddb
+  make
+  make check
+  make install
+
+  cd $CACHE_DIR/$STACK
+
+  # Get the geoip2 nginx module
+  if [ ! -d "ngx_http_geoip2_module" ]; then
+    git clone https://github.com/leev/ngx_http_geoip2_module.git
+  fi
+
+  wget -c http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz
+  tar xzf nginx-$NGINX_VERSION.tar.gz
+  cd nginx-$NGINX_VERSION
+
+  # Compile nginx
+  ./configure \
+      --with-ld-opt="-L /tmp/libmaxminddb/lib" \
+      --with-cc-opt="-I /tmp/libmaxminddb/include" \
+      --prefix=/tmp/nginx \
+      --with-http_ssl_module \
+      --with-http_realip_module \
+      --with-http_gzip_static_module \
+      --with-http_auth_request_module \
+      --add-module=../ngx_http_geoip2_module
+  make
+  make install
+
+  # Clean up the compile dir
+  cd $CACHE_DIR/$STACK
+  rm -rf nginx-$NGINX_VERSION
+
+  # Copy the resulting binary to the cache dir
+  cp /tmp/nginx/sbin/nginx $FINAL_NGINX_BINARY
+  echo "-----> nginx-buildpack: nginx $NGINX_VERSION for $STACK compiled and placed into $FINAL_NGINX_BINARY"
 fi
 
-cd libmaxminddb
-./bootstrap
-./configure --prefix=/tmp/libmaxminddb
-make
-make check
-make install
+# Place the nginx binary into the app
+mkdir -p $BUILD_DIR/bin
+cp $FINAL_NGINX_BINARY $BUILD_DIR/bin/nginx
+echo "-----> nginx-buildpack: Installed nginx $NGINX_VERSION $STACK to apps /bin"
 
-cd $CACHE_DIR/$STACK
-
-# Get the geoip2 nginx module
-if [ ! -d "ngx_http_geoip2_module" ]; then
-  git clone https://github.com/leev/ngx_http_geoip2_module.git
-fi
-
-wget -c http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz
-tar xzf nginx-$NGINX_VERSION.tar.gz
-cd nginx-$NGINX_VERSION
-
-# Compile nginx
-./configure \
-    --with-ld-opt="-L /tmp/libmaxminddb/lib" \
-    --with-cc-opt="-I /tmp/libmaxminddb/include" \
-    --prefix=/tmp/nginx \
-    --with-http_ssl_module \
-    --with-http_realip_module \
-    --with-http_gzip_static_module \
-    --with-http_auth_request_module \
-    --add-module=../ngx_http_geoip2_module
-make
-make install
-
-# Clean up the compile dir
-cd $CACHE_DIR/$STACK
-rm -rf nginx-$NGINX_VERSION
-
-# Copy the resulting binary to the cache dir
-cp /tmp/nginx/sbin/nginx $FINAL_NGINX_BINARY
-echo "-----> nginx-buildpack: nginx $NGINX_VERSION for $STACK compiled and placed into $FINAL_NGINX_BINARY"
-
-exit 0
-
-cd $BUILD_DIR
-# mkdir -p "$1/bin/"
-# cp "bin/nginx-$STACK" "$1/bin/nginx"
-# nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
-# echo "-----> nginx-buildpack: Installed ${nginx_version} to app/bin"
-# cp bin/start-nginx "$1/bin/"
-# echo '-----> nginx-buildpack: Added start-nginx to app/bin'
+# cp bin/start-nginx BUILD_DIR/bin/
+# echo '-----> nginx-buildpack: Added start-nginx to apps /bin'
 #
-# mkdir -p "$1/config"
+# mkdir -p $BUILD_DIR/config
 #
-# cp config/mime.types "$1/config/"
+# cp config/mime.types $BUILD_DIR/config
 # echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
 #
 # if [[ ! -f $1/config/nginx.conf.erb ]]; then
@@ -85,4 +87,5 @@ cd $BUILD_DIR
 # else
 # 	echo '-----> nginx-buildpack: Custom config found in app/config.'
 # fi
-# exit 0
+
+exit 0
