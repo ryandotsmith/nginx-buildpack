@@ -23,9 +23,9 @@ However there are some significant differences:
 Versions
 --------
 
-* [NGINX](http://nginx.org/) 1.5.12
-* [PCRE](http://sourceforge.net/projects/pcre/) 8.34
-* [ngx_headers_more](https://github.com/agentzh/headers-more-nginx-module) 0.25
+* [NGINX](http://nginx.org/) 1.12.1
+* [PCRE](http://sourceforge.net/projects/pcre/) 8.41
+* [ngx_headers_more](https://github.com/agentzh/headers-more-nginx-module) 0.32
 
 These versions are tunable by setting `NGINX_VERSION`, `NGINX_PCRE_VERSION` and `NGINX_HEADERS_MORE_VERSION` in the app config, so you can update even if the buildpack hasn't bee updated yet.
 
