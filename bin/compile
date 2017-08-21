@@ -1,23 +1,114 @@
 #!/usr/bin/env bash
 
-set -e
+main() {
+    APP_DIR=/app
+    BUILD_DIR=$1    # /tmp/build_76471de2-7dff-46b7-b331-c8dd07653def
+    CACHE_DIR=$2    # /app/tmp/cache
+    ENV_DIR=$3
+    BUILDPACK_DIR=$(readlink -f $(dirname $(type -P "$0"))/..)
 
-mkdir -p "$1/bin/"
-cp "bin/nginx-$STACK" "$1/bin/nginx"
-nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
-echo "-----> nginx-buildpack: Installed ${nginx_version} to app/bin"
-cp bin/start-nginx "$1/bin/"
-echo '-----> nginx-buildpack: Added start-nginx to app/bin'
+    : ${NGINX_VERSION:=1.12.1}
+    : ${NGINX_PCRE_VERSION:=8.41}
+    : ${NGINX_HEADERS_MORE_VERSION:=0.32}
 
-mkdir -p "$1/config"
+    set -eo pipefail
 
-cp config/mime.types "$1/config/"
-echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
+    load-env
 
-if [[ ! -f $1/config/nginx.conf.erb ]]; then
-	cp config/nginx.conf.erb "$1/config/"
-	echo '-----> nginx-buildpack: Default config copied to app/config.'
-else
-	echo '-----> nginx-buildpack: Custom config found in app/config.'
-fi
-exit 0
+    declare cached_version
+    if ! is-enabled "$NGINX_FORCE_BUILD"; then
+        cached_version=$($CACHE_DIR/sbin/nginx -V 2>&1 | head -n1 | awk -F/ '{print $NF}') || true
+    fi
+
+    if [[ "$cached_version" != "$NGINX_VERSION" ]]; then
+        announce "Building NGINX $NGINX_VERSION"
+        build-nginx $CACHE_DIR
+    else
+        announce "Using cached NGINX $NGINX_VERSION"
+    fi
+
+    install $CACHE_DIR/sbin/nginx bin/nginx
+    install $BUILDPACK_DIR/bin/start-nginx bin/start-nginx
+    cond-install $BUILDPACK_DIR/config/mime.types config/mime.types
+    cond-install $BUILDPACK_DIR/config/nginx.conf.erb config/nginx.conf.erb
+}
+
+load-env() {
+    declare e
+    for e in $ENV_DIR/*; do
+        e=${e##*/}
+        if [[ $e == NGINX_* ]]; then
+            export "$e=$(<$ENV_DIR/$e)"
+        fi
+    done
+}
+
+build-nginx() {
+    declare nginx_install_dir=$1
+    declare nginx_build_dir=/tmp/nginx-build
+
+    declare nginx_url=http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz
+    declare pcre_url=http://downloads.sourceforge.net/project/pcre/pcre/$NGINX_PCRE_VERSION/pcre-$NGINX_PCRE_VERSION.tar.bz2
+    declare headers_more_url=https://github.com/agentzh/headers-more-nginx-module/archive/v$NGINX_HEADERS_MORE_VERSION.tar.gz
+
+    (
+        set-indent
+
+        mkdir -p $nginx_build_dir
+        cd $nginx_build_dir
+
+        curl -#L $nginx_url | tar xz
+        cd nginx-$NGINX_VERSION
+        curl -#L $pcre_url | tar xj
+        curl -#L $headers_more_url | tar xz
+
+        patch -p1 < $BUILDPACK_DIR/nginx-1.5.12-heroku.patch
+
+        CFLAGS="-O3 -pipe" ./configure \
+            --prefix=$nginx_install_dir \
+            --with-pcre=pcre-$NGINX_PCRE_VERSION \
+            --add-module=$PWD/headers-more-nginx-module-$NGINX_HEADERS_MORE_VERSION \
+            --with-http_addition_module \
+            --with-http_dav_module \
+            --with-http_gzip_static_module \
+            --with-http_realip_module \
+            --with-http_stub_status_module \
+            --with-http_ssl_module \
+            --with-http_sub_module \
+            --with-http_xslt_module
+        make -j4
+
+        mkdir -p $nginx_install_dir
+        make install
+    )
+}
+
+cond-install() {
+    if [[ -e $BUILD_DIR/$2 ]]; then
+        announce "Found custom $2"
+    else
+        install "$1" "$2"
+    fi
+}
+
+install() {
+    mkdir -p "$BUILD_DIR/$(dirname $2)"
+    announce "Installing $2"
+    cp -a "$1" "$BUILD_DIR/$(dirname $2)/"
+}
+
+set-indent() {
+    exec &> >(sed -u 's/^/       /')
+}
+
+announce() {
+    echo "-----> nginx-buildpack: $*"
+}
+
+is-enabled() {
+    ( shopt -s extglob nocasematch
+      [[ $1 == @(1|true|yes|on) ]]
+    )
+}
+
+[[ "$0" != "$BASH_SOURCE" ]] || main "$@"

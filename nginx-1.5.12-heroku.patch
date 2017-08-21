@@ -1,0 +1,17 @@
+--- nginx-1.5.12/src/http/modules/ngx_http_log_module.c.heroku	2014-03-29 11:21:50.000000000 -0400
++++ nginx-1.5.12/src/http/modules/ngx_http_log_module.c	2014-03-29 11:33:33.977839701 -0400
+@@ -1128,7 +1128,13 @@
+     n = ngx_http_script_variables_count(&value[1]);
+ 
+     if (n == 0) {
+-        log->file = ngx_conf_open_file(cf->cycle, &value[1]);
++        name = value[1];
++
++        if (ngx_strcmp(value[1].data, "error") == 0) {
++            ngx_str_null(&name);
++        }
++
++        log->file = ngx_conf_open_file(cf->cycle, &name);
+         if (log->file == NULL) {
+             return NGX_CONF_ERROR;
+         }

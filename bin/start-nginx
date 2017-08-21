@@ -1,72 +1,194 @@
 #!/usr/bin/env bash
 
-psmgr=/tmp/nginx-buildpack-wait
-rm -f $psmgr
-mkfifo $psmgr
+main() {
+    if ! is-enabled "${NGINX_ENABLED:-1}"; then
+        at nginx-disabled
+        exec "$@"
+    fi
 
-#Evaluate config to get $PORT
-erb config/nginx.conf.erb > config/nginx.conf
+    at nginx-enabled
+    run-nginx "$@"
+}
 
-n=1
-while getopts :f option ${@:1:2}
-do
-        case "${option}"
-        in
-                f) FORCE=$OPTIND; n=$((n+1));;
-        esac
-done
+run-nginx() {
+    declare psmgr=/tmp/nginx-buildpack-wait
+    declare -A pids signals
 
-#Initialize log directory.
-mkdir -p logs/nginx
-touch logs/nginx/access.log logs/nginx/error.log
-echo 'buildpack=nginx at=logs-initialized'
+    set-vars
 
-#Start log redirection.
-(
-	#Redirect NGINX logs to stdout.
-	tail -qF -n 0 logs/nginx/*.log
-	echo 'logs' >$psmgr
-) &
+    # Evaluate configs to get $PORT
+    for c in config/*.conf.erb; do
+        erb $c > ${c%.erb}
+    done
 
-#Start App Server
-(
-	#Take the command passed to this bin and start it.
-	#E.g. bin/start-nginx bundle exec unicorn -c config/unicorn.rb
-        COMMAND=${@:$n}
-	echo "buildpack=nginx at=start-app cmd=$COMMAND"
-	$COMMAND
-	echo 'app' >$psmgr
-) &
+    # Use named pipe to detect exit of any subprocess.
+    rm -f "$psmgr"
+    mkfifo "$psmgr"
 
-if [[ -z "$FORCE" ]]
-then
-	FILE="/tmp/app-initialized"
+    # Start app.
+    app-start SIGTERM "$@"
+    pid=$!
 
-	#We block on app-initialized so that when NGINX binds to $PORT
-	#are app is ready for traffic.
-	while [[ ! -f "$FILE" ]]
-	do
-		echo 'buildpack=nginx at=app-initialization'
-		sleep 1
-	done
-	echo 'buildpack=nginx at=app-initialized'
-fi
+    # Wait for app to start.
+    if is-enabled "$NGINX_WAIT_ENABLED"; then
+        while [[ ! -e "$NGINX_WAIT_FILE" ]]; do
+            at app-waiting
+            sleep 1
+        done
+        at app-initialized
+    fi
 
-#Start NGINX
-(
-	#We expect nginx to run in foreground.
-	#We also expect a socket to be at /tmp/nginx.socket.
-	echo 'buildpack=nginx at=nginx-start'
-	bin/nginx -p . -c config/nginx.conf
-	echo 'nginx' >$psmgr
-) &
+    # Create logs dir. NGINX insists on creating logs/error.log even
+    # though it will remain an empty file, with actual logging on stderr.
+    mkdir -p logs
 
-#This read will block the process waiting on a msg to be put into the fifo.
-#If any of the processes defined above should exit,
-#a msg will be put into the fifo causing the read operation
-#to un-block. The process putting the msg into the fifo
-#will use it's process name as a msg so that we can print the offending
-#process to stdout.
-read exit_process <$psmgr
-echo "buildpack=nginx at=exit process=$exit_process"
-exit 1
+    # Start NGINX. SIGQUIT for graceful shutdown.
+    aux-start nginx SIGQUIT bin/nginx -p "$PWD" -c config/nginx.conf
+
+    # Don't exit top script until all subprocesses are done.
+    trap '' SIGTERM
+
+    # This read will block the process waiting on a msg to be put into the
+    # fifo. If any of the processes defined above should exit, a msg will be
+    # put into the fifo causing the read operation to un-block. The process
+    # putting the msg into the fifo will use it's process name as a msg so that
+    # we can print the offending process to stdout.
+    declare exit_process
+    read exit_process < "$psmgr"
+    at "exit process=$exit_process"
+
+    # Remove the FIFO. This allows following writes to simply create a file,
+    # rather than blocking because there's nothing reading the other end.
+    rm -f "$psmgr"
+
+    # Clean up any running processes.
+    # SIGTERM application just in case something else crashed.
+    # If the dyno is shutting down, then SIGTERM has already been sent.
+    at "kill-app pid=$pid"
+    kill -SIGTERM $pid
+
+    # Wait for the app to finish.
+    at "wait-app pid=$pid"
+    wait $pid
+
+    # Kill the auxiliary processes.
+    # Send each one SIGHUP which will be translated by the trap in aux-start.
+    declare name
+    for name in "${!pids[@]}"; do
+        at "kill-aux name=$name pid=${pids[$name]} signal=${signals[$name]}"
+        kill -SIGHUP "${pids[$name]}"
+    done
+}
+
+app-start() {
+    declare name=app signal=$1
+    shift
+
+    (
+        at "$name-start"
+
+        # Start child in the background. This is before the trap because
+        # the app needs to be able to receive when the dyno broadcasts
+        # SIGTERM on shutdown.
+        "$@" &
+
+        # Translate SIGHUP/SIGTERM to the appropriate signal to stop the child
+        # (probably SIGTERM in this case). Since this doesn't exit, it won't
+        # cancel the wait.
+        trap "kill -$signal $!" SIGHUP SIGTERM
+
+        # Wait for the app to finish, either by crash or by $signal
+        wait
+
+        # Notify FIFO if this finishes first
+        echo "$name" > "$psmgr"
+
+        at "$name-end"
+    ) &
+
+    at "$name-launched pid=$!"
+}
+
+aux-start() {
+    declare name=$1 signal=$2
+    shift 2
+
+    (
+        at "$name-start"
+
+        # Ignore SIGTERM; this is inherited by the child process.
+        trap '' SIGTERM
+
+        # Start child in the background.
+        "$@" &
+
+        # Translate SIGHUP to the appropriate signal to stop the child
+        # (anything except SIGTERM which is ignored). Since this doesn't
+        # exit, it won't cancel the wait.
+        trap "kill -$signal $!" SIGHUP
+
+        # Wait for child to finish, either by crash or by $signal
+        wait
+
+        # Notify FIFO if this finishes first
+        echo "$name" > "$psmgr"
+
+        at "$name-end"
+    ) &
+
+    pids[$name]=$!
+    signals[$name]=$signal
+    at "$name-launched pid=$!"
+}
+
+set-vars() {
+    : ${NGINX_ENABLED:=1}
+    : ${NGINX_LISTEN:=$PORT}
+    : ${NGINX_SOCKET:=/tmp/nginx.socket}
+    : ${NGINX_WAIT_FILE:=$NGINX_SOCKET}
+    : ${NGINX_WAIT_ENABLED:=1}
+    : ${NGINX_WORKERS:=4}
+    NGINX_GZIP_ENABLED=$(norm-enabled "${NGINX_GZIP_ENABLED:-1}")
+    : ${NGINX_GZIP_PROXIED:=any}
+    NGINX_GZIP_TYPES=$(expand-types "${NGINX_GZIP_TYPES:-plain css javascript json xml atom+xml rss+xml}")
+
+    if [[ $NGINX_SOCKET == /* ]]; then
+        NGINX_SOCKET=unix:$NGINX_SOCKET
+    fi
+
+    # Override $PORT for the app
+    PORT=$NGINX_SOCKET
+
+    export ${!NGINX_*} PORT
+}
+
+expand-types() {
+    declare -a types
+    declare t
+
+    for t in $*; do
+        if [[ $t == */* ]]; then
+            types+=( $t )
+        else
+            types+=( {application,text}/{,x-}$t )
+        fi
+    done
+
+    echo ${types[*]}
+}
+
+at() {
+    echo "buildpack=nginx at=$*"
+}
+
+is-enabled() {
+    (   shopt -s extglob nocasematch
+        [[ $1 == @(1|true|yes|on) ]]
+    )
+}
+
+norm-enabled() {
+    is-enabled "$1" && echo 1 || echo 0
+}
+
+[[ "$0" != "$BASH_SOURCE" ]] || main "$@"
