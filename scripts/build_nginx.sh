@@ -1,8 +1,8 @@
 #!/bin/bash
 # Build NGINX and modules on Heroku.
 
-# This program is designed to run during the 
-# application build process. 
+# This program is designed to run during the
+# application build process.
 # We would like to build an NGINX binary for the buildpack on the
 # exact machine in which the binary will run.
 
@@ -10,7 +10,7 @@ NGINX_VERSION=1.8.0
 PCRE_VERSION=8.36
 HEADERS_MORE_VERSION=0.25
 
-INSTALL_ROOT=$1 
+INSTALL_ROOT=$1
 
 nginx_tarball_url=http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 pcre_tarball_url=http://skylineservers.dl.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2
@@ -38,6 +38,7 @@ echo "Starting build..."
 		--with-pcre=pcre-${PCRE_VERSION} \
 		--with-http_ssl_module \
 		--prefix=${INSTALL_ROOT} \
+		--with-http_realip_module \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
 	make install
 )

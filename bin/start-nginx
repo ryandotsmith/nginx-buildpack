@@ -6,7 +6,7 @@ echo 'buildpack=nginx at=nginx-config'
 echo 'buildpack=nginx port=' $PORT
 erb config/nginx.conf.erb > config/nginx.conf
 
-# make sure we have a place for logs 
+# make sure we have a place for logs
 mkdir -p logs/nginx
 touch logs/nginx/access.log logs/nginx/error.log
 
@@ -18,7 +18,7 @@ tail -qF -n 0 logs/nginx/*.log &
 # Start NGINX
 # We expect nginx to run in foreground.
 echo 'buildpack=nginx at=nginx-start'
-bin/nginx -p . -c config/nginx.conf
+bin/nginx -p . -c config/nginx.conf --with-http_realip_module
 echo "buildpack=nginx at=exit"
 
 exit 1
