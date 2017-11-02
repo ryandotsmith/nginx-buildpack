@@ -18,7 +18,7 @@ tail -qF -n 0 logs/nginx/*.log &
 # Start NGINX
 # We expect nginx to run in foreground.
 echo 'buildpack=nginx at=nginx-start'
-bin/nginx -p . -c config/nginx.conf --with-http_realip_module
+bin/nginx -p . -c config/nginx.conf
 echo "buildpack=nginx at=exit"
 
 exit 1
