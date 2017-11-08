@@ -14,7 +14,7 @@ ENV_DIR=$3
 NGINX_VERSION=$(cat $ENV_DIR/NGINX_VERSION)
 echo "-----> nginx-buildpack: NGINX_VERSION=$NGINX_VERSION STACK=$STACK"
 
-FINAL_NGINX_BINARY=$CACHE_DIR/$STACK/nginx
+FINAL_NGINX_BINARY=$CACHE_DIR/$STACK/nginx-$NGINX_VERSION
 
 if [ -f $FINAL_NGINX_BINARY ]; then
   echo "-----> nginx-buildpack: $FINAL_NGINX_BINARY already exists"
