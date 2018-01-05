@@ -8,8 +8,8 @@ Some application servers (e.g. Ruby's Unicorn) halt progress when dealing with n
 
 ## Versions
 
-* Buildpack Version: 0.4
-* NGINX Version: 1.5.7
+* Buildpack Version: 1.0
+* NGINX Version: 1.9.5
 
 ## Requirements
 
@@ -69,7 +69,23 @@ You can provide your own NGINX config by creating a file named `nginx.conf.erb` 
 
 ### Customizable NGINX Compile Options
 
-See [scripts/build_nginx.sh](scripts/build_nginx.sh) for the build steps. Configuring is as easy as changing the "./configure" options.
+See [scripts/build_nginx](scripts/build_nginx) for the build steps. Configuring is as easy as changing the "./configure" options.
+
+You can run the builds in a [Docker](https://www.docker.com/) container:
+
+```
+$ docker-machine create --driver virtualbox cedar
+$ eval "$(docker-machine env ceder)"
+$ make build # It outputs the latest builds to bin/cedar-*
+```
+
+To test the builds:
+
+```
+$ make shell
+$ cp bin/nginx-$STACK bin/nginx
+$ FORCE=1 bin/start-nginx
+```
 
 ### Application/Dyno coordination
 
@@ -83,11 +99,7 @@ Here are 2 setup examples. One example for a new app, another for an existing ap
 
 Update Buildpacks
 ```bash
-$ heroku config:set BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git
-$ echo 'https://github.com/ryandotsmith/nginx-buildpack.git' >> .buildpacks
-$ echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz' >> .buildpacks
-$ git add .buildpacks
-$ git commit -m 'Add multi-buildpack'
+$ heroku buildpacks:add https://github.com/heroku/heroku-buildpack-nginx
 ```
 Update Procfile:
 ```
@@ -154,9 +166,9 @@ web: bin/start-nginx bundle exec unicorn -c config/unicorn.rb
 ```
 Create & Push Heroku App:
 ```bash
-$ heroku create --buildpack https://github.com/ddollar/heroku-buildpack-multi.git
-$ echo 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz' >> .buildpacks
-$ echo 'https://github.com/ryandotsmith/nginx-buildpack.git' >> .buildpacks
+$ heroku create
+$ heroku buildpacks:add heroku/ruby
+$ heroku buildpacks:add https://github.com/heroku/heroku-buildpack-nginx
 $ git add .
 $ git commit -am "init"
 $ git push heroku master
