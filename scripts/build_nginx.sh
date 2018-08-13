@@ -19,10 +19,6 @@ headers_more_nginx_module_url=https://github.com/agentzh/headers-more-nginx-modu
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
 
-echo "Serving files from /tmp on $PORT"
-cd /tmp
-python -m SimpleHTTPServer $PORT &
-
 cd $temp_dir
 echo "Temp dir: $temp_dir"
 
@@ -42,12 +38,9 @@ echo "Downloading $headers_more_nginx_module_url"
 		--prefix=/tmp/nginx \
     --with-http_ssl_module \
     --with-http_stub_status_module \
+    --with-http_gzip_static_module \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
 	make install
 )
 
-while true
-do
-	sleep 1
-	echo "."
-done
+cp /tmp/nginx/sbin/nginx $1

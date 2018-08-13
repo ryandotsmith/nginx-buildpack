@@ -9,6 +9,7 @@ types {
     application/x-javascript              js;
     application/atom+xml                  atom;
     application/rss+xml                   rss;
+    application/json                      json;
 
     text/mathml                           mml;
     text/plain                            txt;
