@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - add nginx solo support, see [sample config for nginx solo mode](config/nginx-solo-sample.conf.erb) and [README](README.md)
 - add headers-more module from https://github.com/openresty/headers-more-nginx-module
 
+### Changed
+- updated build scripts to compile on 2 cores (-j 2)
+
 ## [0.8] - 2018-09-13
 ### Changed
 - update nginx to 1.15.3
