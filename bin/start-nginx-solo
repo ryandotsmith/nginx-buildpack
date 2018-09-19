@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+psmgr=/tmp/nginx-buildpack-wait
+rm -f $psmgr
+mkfifo $psmgr
+
+# Evaluate config to get $PORT
+erb config/nginx.conf.erb > config/nginx.conf
+
+n=1
+while getopts :f option ${@:1:2}
+do
+  case "${option}"
+  in
+    f) FORCE=$OPTIND; n=$((n+1));;
+  esac
+done
+
+# Initialize log directory.
+mkdir -p logs/nginx
+touch logs/nginx/access.log logs/nginx/error.log
+echo 'buildpack=nginx at=logs-initialized'
+
+# Start log redirection.
+(
+  # Redirect nginx logs to stdout.
+  tail -qF -n 0 logs/nginx/*.log
+  echo 'logs' >$psmgr
+) &
+
+# Start nginx
+(
+  #We expect nginx to run in foreground.
+  #We also expect a socket to be at /tmp/nginx.socket.
+  echo 'buildpack=nginx at=nginx-start'
+  bin/nginx -p . -c config/nginx.conf
+  echo 'nginx' >$psmgr
+) &
+
+# This read will block the process waiting on a msg to be put into the fifo.
+# If any of the processes defined above should exit,
+# a msg will be put into the fifo causing the read operation
+# to un-block. The process putting the msg into the fifo
+# will use it's process name as a msg so that we can print the offending
+# process to stdout.
+read exit_process <$psmgr
+echo "buildpack=nginx at=exit process=$exit_process"
+exit 1

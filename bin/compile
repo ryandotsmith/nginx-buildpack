@@ -8,6 +8,8 @@ nginx_version=$(./bin/nginx-$STACK -V 2>&1 | head -1 | awk '{ print $NF }')
 echo "-----> nginx-buildpack: Installed ${nginx_version} to app/bin"
 cp bin/start-nginx "$1/bin/"
 echo '-----> nginx-buildpack: Added start-nginx to app/bin'
+cp bin/start-nginx-solo "$1/bin/"
+echo '-----> nginx-buildpack: Added start-nginx-solo to app/bin'
 
 mkdir -p "$1/config"
 
