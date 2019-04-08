@@ -17,15 +17,23 @@ do
 done
 
 #Initialize log directory.
-mkdir -p logs/nginx
-touch logs/nginx/access.log logs/nginx/error.log
+mkdir logs
+touch logs/access.log logs/error.log
 echo 'buildpack=nginx at=logs-initialized'
 
-#Start log redirection.
+#Start access log redirection.
 (
 	#Redirect NGINX logs to stdout.
-	tail -qF -n 0 logs/nginx/*.log
-	echo 'logs' >$psmgr
+	tail -qF -n 0 logs/access.log
+	echo 'access_logs' >$psmgr
+) &
+
+#Start error log redirection.
+(
+	#Redirect NGINX logs to stdout.
+	tail -qF -n 0 logs/error.log | \
+	python -uc $'import os\nimport json\nimport sys\nfor line in sys.stdin: print(json.dumps({"app": os.getenv("APP", "unknown"), "error": line}))'
+	echo 'error_logs' >$psmgr
 ) &
 
 #Start App Server

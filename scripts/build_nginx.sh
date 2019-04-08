@@ -9,19 +9,18 @@
 # Once the dyno has is 'up' you can open your browser and navigate
 # this dyno's directory structure to download the nginx binary.
 
-NGINX_VERSION=${NGINX_VERSION-1.5.7}
+NGINX_VERSION=${NGINX_VERSION-1.8.0}
 PCRE_VERSION=${PCRE_VERSION-8.21}
 HEADERS_MORE_VERSION=${HEADERS_MORE_VERSION-0.23}
+OPEN_SSL_VERSION=${OPEN_SSL_VERSION-1.0.2d}
 
 nginx_tarball_url=http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
 pcre_tarball_url=http://garr.dl.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.bz2
 headers_more_nginx_module_url=https://github.com/agentzh/headers-more-nginx-module/archive/v${HEADERS_MORE_VERSION}.tar.gz
+ssl_tarball_url=https://www.openssl.org/source/openssl-${OPEN_SSL_VERSION}.tar.gz
+
 
 temp_dir=$(mktemp -d /tmp/nginx.XXXXXXXXXX)
-
-echo "Serving files from /tmp on $PORT"
-cd /tmp
-python -m SimpleHTTPServer $PORT &
 
 cd $temp_dir
 echo "Temp dir: $temp_dir"
@@ -35,17 +34,14 @@ echo "Downloading $pcre_tarball_url"
 echo "Downloading $headers_more_nginx_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $headers_more_nginx_module_url | tar xvz )
 
-(
-	cd nginx-${NGINX_VERSION}
-	./configure \
-		--with-pcre=pcre-${PCRE_VERSION} \
-		--prefix=/tmp/nginx \
-		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
-	make install
-)
+echo "Downloading $ssl_tarball_url"
+(cd nginx-${NGINX_VERSION} && curl -L $ssl_tarball_url | tar xvz )
 
-while true
-do
-	sleep 1
-	echo "."
-done
+cd nginx-${NGINX_VERSION}
+./configure \
+	--with-pcre=pcre-${PCRE_VERSION} \
+	--prefix=/tmp/nginx \
+	--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION} \
+        --with-http_ssl_module --with-openssl=./openssl-${OPEN_SSL_VERSION}
+make -j1 install
+
