@@ -39,6 +39,7 @@ echo "Downloading $headers_more_nginx_module_url"
     --with-http_ssl_module \
     --with-http_stub_status_module \
     --with-http_gzip_static_module \
+    --with-http_realip_module \
 		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
 	make install
 )

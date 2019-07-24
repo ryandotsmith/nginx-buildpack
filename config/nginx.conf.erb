@@ -26,6 +26,11 @@ http {
 	#Must read the body in 5 seconds.
 	client_body_timeout 5;
 
+	include config/00_real_ip_cloudflare_00.conf;
+	# Heroku Router
+	set_real_ip_from 10.0.0.0/8;
+	real_ip_header X-Forwarded-For;
+
 	upstream app_server {
 		server unix:/tmp/nginx.socket fail_timeout=0;
  	}
@@ -36,7 +41,7 @@ http {
 		keepalive_timeout 5;
 
 		location / {
-			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+			proxy_set_header X-Forwarded-For '';
 			proxy_set_header Host $http_host;
 			proxy_redirect off;
 			proxy_pass http://app_server;
