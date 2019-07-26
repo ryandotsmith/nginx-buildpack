@@ -14,6 +14,12 @@ mkdir -p "$1/config"
 cp config/mime.types "$1/config/"
 echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
 
+echo '-----> nginx-buildpack: Fetching Cloudflare IP ranges'
+./scripts/build_cloudflare_real_ip_config.sh
+echo '-----> nginx-buildpack: Copying Cloudflare IP ranges file'
+cp config/00_real_ip_cloudflare_00.conf $1/config/00_real_ip_cloudflare_00.conf
+
+
 if [[ ! -f $1/config/nginx.conf.erb ]]; then
 	cp config/nginx.conf.erb "$1/config/"
 	echo '-----> nginx-buildpack: Default config copied to app/config.'
