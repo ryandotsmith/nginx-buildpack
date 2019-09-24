@@ -42,6 +42,7 @@ http {
 
 		location / {
 			proxy_set_header X-Forwarded-For '';
+			proxy_set_header X-Frame-Options 'ALLOW-FROM: shopify.com';
 			proxy_set_header Host $http_host;
 			proxy_redirect off;
 			proxy_pass http://app_server;
