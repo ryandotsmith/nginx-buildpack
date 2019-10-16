@@ -18,6 +18,8 @@ echo '-----> nginx-buildpack: Fetching Cloudflare IP ranges'
 ./scripts/build_cloudflare_real_ip_config.sh
 echo '-----> nginx-buildpack: Copying Cloudflare IP ranges file'
 cp config/00_real_ip_cloudflare_00.conf $1/config/00_real_ip_cloudflare_00.conf
+echo '-----> nginx-buildpack: Copying Cloudflare IP ranges allow list'
+cp config/00_allow_cloudflare_00.conf $1/config/00_allow_cloudflare_00.conf
 
 
 if [[ ! -f $1/config/nginx.conf.erb ]]; then
