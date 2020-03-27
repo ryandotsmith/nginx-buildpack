@@ -58,7 +58,10 @@ echo '-----> nginx-buildpack: Added start-nginx to app/bin'
 mkdir -p $BUILD_DIR/config
 
 cp $BUILDPACK_DIR/config/mime.types $BUILD_DIR/config/
-echo '-----> nginx-buildpack: Default mime.types copied to app/config/'
+echo '-----> nginx-buildpack: Buildpack mime.types copied to app/config/'
+
+cp $BUILDPACK_DIR/config/blockips.conf.erb $BUILD_DIR/config/
+echo '-----> nginx-buildpack: Buildpack blockips.conf.erb copied to app/config/'
 
 if [[ ! -f $BUILD_DIR/config/nginx.conf.erb ]]; then
 	cp $BUILDPACK_DIR/config/nginx.conf.erb "$BUILD_DIR/config/"
