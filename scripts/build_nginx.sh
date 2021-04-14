@@ -32,16 +32,16 @@ echo "Downloading $headers_more_nginx_module_url"
 (cd nginx-${NGINX_VERSION} && curl -L $headers_more_nginx_module_url | tar xvz )
 
 (
-	cd nginx-${NGINX_VERSION}
-	./configure \
-		--with-pcre=pcre-${PCRE_VERSION} \
-		--prefix=/tmp/nginx \
+  cd nginx-${NGINX_VERSION}
+  ./configure \
+    --with-pcre=pcre-${PCRE_VERSION} \
+    --prefix=/tmp/nginx \
     --with-http_ssl_module \
     --with-http_stub_status_module \
     --with-http_gzip_static_module \
     --with-http_realip_module \
-		--add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
-	make install
+    --add-module=/${temp_dir}/nginx-${NGINX_VERSION}/headers-more-nginx-module-${HEADERS_MORE_VERSION}
+  make install
 )
 
 cp /tmp/nginx/sbin/nginx $1
